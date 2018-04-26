@@ -1,5 +1,6 @@
 package com.zou.wechatdetector.utils;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
@@ -158,5 +159,32 @@ public class Tools {
 
         }
         return packageName;
+    }
+
+    public static boolean hasUsageAccessPermission(Context context) {
+        long ts = System.currentTimeMillis();
+        @SuppressLint("WrongConstant") UsageStatsManager usageStatsManager = (UsageStatsManager)context.getApplicationContext()
+                .getSystemService("usagestats");
+        List<UsageStats> queryUsageStats = usageStatsManager.queryUsageStats(
+                UsageStatsManager.INTERVAL_BEST, 0, ts);
+        if (queryUsageStats == null || queryUsageStats.isEmpty()) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean isProessRunning(Context context, String proessName) {
+
+        boolean isRunning = false;
+        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+
+        List<ActivityManager.RunningAppProcessInfo> lists = am.getRunningAppProcesses();
+        for(ActivityManager.RunningAppProcessInfo info : lists){
+            if(info.processName.equals(proessName)){
+                //Log.i("Service2进程", ""+info.processName);
+                isRunning = true;
+            }
+        }
+        return isRunning;
     }
 }
