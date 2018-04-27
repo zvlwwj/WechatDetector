@@ -2,17 +2,29 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
+    def DEF_USER_NAME = "\"zoujingyi1992\""
     defaultConfig {
         applicationId "com.zou.wechatdetector"
         minSdkVersion 21
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        buildConfigField("String","WECHAT_USER_NAME",project.hasProperty('USER_NAME') ? USER_NAME : "${DEF_USER_NAME}")
     }
+
+    signingConfigs{
+        release{
+            storeFile file('zjykey.jks')
+            storePassword "zv63108412"
+            keyAlias "key0"
+            keyPassword "zv63108412"
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -20,6 +32,8 @@ android {
         targetCompatibility 1.8
         sourceCompatibility 1.8
     }
+
+
 }
 
 dependencies {

@@ -79,23 +79,16 @@ public class MainService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //启动守护进程
-        JobScheduler jobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
-        jobScheduler.cancelAll();
-        JobInfo.Builder builder = new JobInfo.Builder(1024, new ComponentName(getPackageName(), JobProtectService.class.getName()));
-        builder.setPeriodic(15*60*1000);
-        builder.setPersisted(true);
-        builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
-        int schedule = jobScheduler.schedule(builder.build());
-        if (schedule <= 0) {
-            Log.w(TAG, "schedule error！");
-        }
-        return Service.START_STICKY;
-//        return super.onStartCommand(intent,flags,startId);
+        Log.i(TAG,"onStartCommand");
+
+//        return Service.START_STICKY;
+        return super.onStartCommand(intent,flags,startId);
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.i(TAG,"onCreate");
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             startForeground(1,getNotification());
         }else {
