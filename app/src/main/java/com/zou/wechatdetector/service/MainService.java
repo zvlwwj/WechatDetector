@@ -251,8 +251,6 @@ public class MainService extends Service {
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
             Log.d(TAG, "MyService: onServiceConnected");
-
-            // sdk >=18
             // 的，会在通知栏显示service正在运行，这里不要让用户感知，所以这里的实现方式是利用2个同进程的service，利用相同的notificationID，
             // 2个service分别startForeground，然后只在1个service里stopForeground，这样即可去掉通知栏的显示
             Service innerService = ((InnerService.LocalBinder) binder)

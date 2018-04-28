@@ -51,12 +51,12 @@ public class MainActivity extends Activity {
         //启动截屏服务
         Intent intent = new Intent(this,MainService.class);
         //设置截屏服务为前台服务
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            //android o 中有限制
-            startForegroundService(intent);
-        }else {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            //android o 中有限制
+//            startForegroundService(intent);
+//        }else {
             startService(intent);
-        }
+//        }
         Log.i(TAG,"onCreate");
         //启动守护进程
 //        Intent portectService = new Intent(this,ProtectService.class);

@@ -26,7 +26,7 @@ public class JobProtectService extends JobService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        return Service.START_STICKY;
+        return super.onStartCommand(intent,flags,startId);
     }
 
     //隔一段时间检查进程是否在运行，如果没有运行，则重启activity

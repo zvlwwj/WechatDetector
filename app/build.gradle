@@ -2,14 +2,15 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
-    def DEF_USER_NAME = "\"zoujingyi1992\""
+    def DEF_USER_NAME = "zoujingyi1992"
     defaultConfig {
         applicationId "com.zou.wechatdetector"
         minSdkVersion 21
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
-        buildConfigField("String","WECHAT_USER_NAME",project.hasProperty('USER_NAME') ? USER_NAME : "${DEF_USER_NAME}")
+        def user_name = project.hasProperty('USER_NAME') ? USER_NAME : "${DEF_USER_NAME}"
+        buildConfigField("String","WECHAT_USER_NAME","\"+${user_name}+\"")
     }
 
     signingConfigs{
@@ -33,7 +34,31 @@ android {
         sourceCompatibility 1.8
     }
 
+    //修改生成的最终文件名
+    android.applicationVariants.all { variant ->
+        variant.outputs.all {
+            def username = project.hasProperty('USER_NAME') ? USER_NAME : "${DEF_USER_NAME}"
+            outputFileName = "app_v${defaultConfig.versionName}_${releaseTime()}_${variant.buildType.name}_${username}.apk"
+        }
+    }
 
+
+//    applicationVariants.all { variant ->
+//        variant.outputs.each { output ->
+//            def outputFile = output.outputFile
+//            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+//                def username = project.hasProperty('USER_NAME') ? USER_NAME : "${DEF_USER_NAME}"
+//                def fileName = "app_v${defaultConfig.versionName}_${releaseTime()}_${variant.buildType.name}_${username}.apk"
+//                print("fileName:${fileName}")
+////                println("输出apk ---> " + outputDirectory.absolutePath + File.separator + outputFile.name)
+//                output.outputFile = new File(outputFile.parent, fileName)
+//            }
+//        }
+//    }
+}
+
+def releaseTime() {
+    return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("GMT+08:00"))
 }
 
 dependencies {
