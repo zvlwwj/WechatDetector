@@ -36,28 +36,17 @@ android {
 
     //修改生成的最终文件名
     android.applicationVariants.all { variant ->
+        if(variant.buildType.name != "debug"){
+            variant.getPackageApplication().outputDirectory = new File(project.rootDir.absolutePath + "/apk")
+        }
         variant.outputs.all {
             def username = project.hasProperty('USER_NAME') ? USER_NAME : "${DEF_USER_NAME}"
-            outputFileName = "app_v${defaultConfig.versionName}_${releaseTime()}_${variant.buildType.name}_${username}.apk"
+            outputFileName = project.hasProperty('APK_NAME') ? APK_NAME :"app_v${defaultConfig.versionName}_${releaseTime()}_${username}.apk"
         }
     }
-
-
-//    applicationVariants.all { variant ->
-//        variant.outputs.each { output ->
-//            def outputFile = output.outputFile
-//            if (outputFile != null && outputFile.name.endsWith('.apk')) {
-//                def username = project.hasProperty('USER_NAME') ? USER_NAME : "${DEF_USER_NAME}"
-//                def fileName = "app_v${defaultConfig.versionName}_${releaseTime()}_${variant.buildType.name}_${username}.apk"
-//                print("fileName:${fileName}")
-////                println("输出apk ---> " + outputDirectory.absolutePath + File.separator + outputFile.name)
-//                output.outputFile = new File(outputFile.parent, fileName)
-//            }
-//        }
-//    }
 }
 
-def releaseTime() {
+static def releaseTime() {
     return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("GMT+08:00"))
 }
 

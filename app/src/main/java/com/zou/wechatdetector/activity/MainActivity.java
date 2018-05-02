@@ -44,7 +44,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Toast.makeText(this, BuildConfig.WECHAT_USER_NAME,Toast.LENGTH_SHORT).show();
+        Log.i(TAG,"WECHAT_USER_NAME : "+BuildConfig.WECHAT_USER_NAME);
         initData();
         //1.请求常规权限
         requestRecordPermission();
