@@ -6,6 +6,7 @@ import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -16,6 +17,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -26,7 +28,6 @@ import com.zhy.m.permission.PermissionGrant;
 import com.zou.wechatdetector.BuildConfig;
 import com.zou.wechatdetector.service.JobProtectService;
 import com.zou.wechatdetector.service.MainService;
-import com.zou.wechatdetector.service.ProtectService;
 import com.zou.wechatdetector.utils.Tools;
 
 import org.greenrobot.eventbus.EventBus;
@@ -40,11 +41,10 @@ public class MainActivity extends Activity {
     private MediaProjectionManager projectionManager;
     private static final int REQUEST_CODE_SCREEN_CAPTURE = 101;
     private static final int REQUEST_CODE_USAGE_ACCESS = 102;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i(TAG,"WECHAT_USER_NAME : "+BuildConfig.WECHAT_USER_NAME);
+//        Log.i(TAG,"WECHAT_USER_NAME : "+BuildConfig.WECHAT_USER_NAME);
         initData();
         //1.请求常规权限
         requestRecordPermission();
@@ -82,6 +82,7 @@ public class MainActivity extends Activity {
 
     private void initData() {
         projectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
+
     }
 
     /**

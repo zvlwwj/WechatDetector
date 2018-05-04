@@ -9,50 +9,62 @@ android {
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
-        def user_name = project.hasProperty('USER_NAME') ? USER_NAME : "${DEF_USER_NAME}"
-        buildConfigField("String","WECHAT_USER_NAME","\"+${user_name}+\"")
+        jackOptions {
+            enabled true
+        }
+//        def user_name = project.hasProperty('USER_NAME') ? USER_NAME : "${DEF_USER_NAME}"
+//        buildConfigField("String","WECHAT_USER_NAME","\"+${user_name}+\"")
     }
 
-    signingConfigs{
-        release{
-            storeFile file('zjykey.jks')
-            storePassword "zv63108412"
-            keyAlias "key0"
-            keyPassword "zv63108412"
-        }
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            signingConfig signingConfigs.release
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
     compileOptions {
-        targetCompatibility 1.8
-        sourceCompatibility 1.8
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
+
+//    signingConfigs{
+//        release{
+//            storeFile file('zjykey.jks')
+//            storePassword "zv63108412"
+//            keyAlias "key0"
+//            keyPassword "zv63108412"
+//        }
+//    }
+//
+//    buildTypes {
+//        release {
+//            minifyEnabled false
+//            signingConfig signingConfigs.release
+//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+//        }
+//    }
+//    compileOptions {
+//        targetCompatibility 1.8
+//        sourceCompatibility 1.8
+//    }
 
     //修改生成的最终文件名
-    android.applicationVariants.all { variant ->
-        if(variant.buildType.name != "debug"){
-            variant.getPackageApplication().outputDirectory = new File(project.rootDir.absolutePath + "/apk")
-        }
-        variant.outputs.all {
-            def username = project.hasProperty('USER_NAME') ? USER_NAME : "${DEF_USER_NAME}"
-            outputFileName = project.hasProperty('APK_NAME') ? APK_NAME :"app_v${defaultConfig.versionName}_${releaseTime()}_${username}.apk"
-        }
+//    android.applicationVariants.all { variant ->
+//        if(variant.buildType.name != "debug"){
+//            variant.getPackageApplication().outputDirectory = new File(project.rootDir.absolutePath + "/apk")
+//        }
+//        variant.outputs.all {
+//            def username = project.hasProperty('USER_NAME') ? USER_NAME : "${DEF_USER_NAME}"
+//            outputFileName = project.hasProperty('APK_NAME') ? APK_NAME :"app_v${defaultConfig.versionName}_${releaseTime()}_${username}.apk"
+//        }
+//    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
     }
 }
 
-static def releaseTime() {
-    return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("GMT+08:00"))
-}
+//static def releaseTime() {
+//    return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("GMT+08:00"))
+//}
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support:design:26.1.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
@@ -65,6 +77,5 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.0.2'
     compile 'com.squareup.retrofit2:converter-gson:2.0.2'
     compile 'com.squareup.retrofit2:adapter-rxjava:2.0.2'
-
     compile 'com.jaredrummler:android-processes:1.1.1'
 }

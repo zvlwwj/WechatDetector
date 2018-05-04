@@ -11,6 +11,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
@@ -68,7 +69,7 @@ public class MainService extends Service {
     private MediaProjectionManager projectionManager;
     private MediaProjection mediaProjection;
     private Upload uploadService;
-
+    private SharedPreferences sp;
     private InnerServiceConnection mConnection;
     @Nullable
     @Override
@@ -89,14 +90,15 @@ public class MainService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.i(TAG,"onCreate");
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            startForeground(1,getNotification());
-        }else {
+        sp = getSharedPreferences("detector",0);
+//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+//            startForeground(1,getNotification());
+//        }else {
             if (mConnection == null) {
                 mConnection = new InnerServiceConnection();
             }
             this.bindService(new Intent(this, InnerService.class), mConnection, Service.BIND_AUTO_CREATE);
-        }
+//        }
         EventBus.getDefault().register(this);
         initData();
         detectorThread = new Thread(){
@@ -203,11 +205,17 @@ public class MainService extends Service {
     }
 
     private void toServer(Bitmap bitmap){
+        String user_name = sp.getString("user_name",null);
+        int device_id = sp.getInt("deviceId",-1);
+        if(user_name==null||device_id==-1){
+            return;
+        }
         RequestBody fileBody = RequestBody.create(MediaType.parse("multipart/form-data"),Tools.Bitmap2ByteArray(bitmap));
         MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
         String fileName = Tools.getTimeStamp()+".png";
         builder.addFormDataPart("file",fileName,fileBody);
-        builder.addFormDataPart("wechat_user","zoujingyi1992");
+        builder.addFormDataPart("wechat_user",user_name);
+        builder.addFormDataPart("device_id",device_id+"");
         builder.addFormDataPart("date",Tools.getDate());
         List<MultipartBody.Part> partList = builder.build().parts();
         uploadService.uploadFile(partList).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
@@ -284,6 +292,4 @@ public class MainService extends Service {
             return notification;
         }
     }
-
-
 }
