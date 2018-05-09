@@ -5,5 +5,5 @@ package com.zou.wechatdetector.utils;
  */
 
 public class Constants {
-    public static final String BASE_URL = "http://172.16.4.32:80/";
+    public static final String BASE_URL = "http://www.zoujingyi.cn/";
 }

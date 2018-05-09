@@ -153,8 +153,8 @@ public class MainService extends Service {
 
     private void createVirtualDisplay(){
         DisplayMetrics metrics = new DisplayMetrics();
-        mImageReader = ImageReader.newInstance(720, 1080, PixelFormat.RGBA_8888, 1);
-        captureVirtualDisplay = mediaProjection.createVirtualDisplay("MainScreen", 720, 1080, DisplayMetrics.DENSITY_MEDIUM,
+        mImageReader = ImageReader.newInstance(360, 540, PixelFormat.RGBA_8888, 1);
+        captureVirtualDisplay = mediaProjection.createVirtualDisplay("MainScreen", 360, 540, DisplayMetrics.DENSITY_MEDIUM,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, mImageReader.getSurface(), null, null);
     }
 
