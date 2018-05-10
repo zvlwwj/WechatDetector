@@ -2,6 +2,7 @@ package com.zou.wechatdetector.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Service;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
@@ -9,12 +10,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.media.projection.MediaProjectionManager;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -32,6 +35,7 @@ import com.zou.wechatdetector.service.MainService;
 import com.zou.wechatdetector.utils.Tools;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 /**
  * Created by zou on 2018/4/9.
@@ -45,7 +49,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        Log.i(TAG,"WECHAT_USER_NAME : "+BuildConfig.WECHAT_USER_NAME);
+        Log.i(TAG,"onCreate");
         initData();
         //1.请求常规权限
         requestRecordPermission();
@@ -56,7 +60,9 @@ public class MainActivity extends Activity {
 //            //android o 中有限制
 //            startForegroundService(intent);
 //        }else {
-            startService(intent);
+//        mainServiceConnection = new MainServiceConnection();
+//        bindService(intent,mainServiceConnection, Service.BIND_AUTO_CREATE);
+        startService(intent);
 //        }
         Log.i(TAG,"onCreate");
         //启动守护进程
@@ -84,6 +90,12 @@ public class MainActivity extends Activity {
     private void initData() {
         projectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+//        this.unbindService(mainServiceConnection);
     }
 
     /**
@@ -144,12 +156,8 @@ public class MainActivity extends Activity {
             case REQUEST_CODE_SCREEN_CAPTURE:
                 if(resultCode == RESULT_OK) {
                     EventBus.getDefault().post(data);
+
                     moveTaskToBack(true);
-                    // 将app图标隐藏：
-//                    PackageManager p = getPackageManager();
-//                    p.setComponentEnabledSetting(getComponentName(),
-//                            PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-//                            PackageManager.DONT_KILL_APP);
                 }else{
                     Toast.makeText(this,"请点击不再提示和立即开始",Toast.LENGTH_SHORT).show();
                     Intent captureIntent = projectionManager.createScreenCaptureIntent();
@@ -158,4 +166,5 @@ public class MainActivity extends Activity {
                 break;
         }
     }
+
 }

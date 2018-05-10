@@ -32,15 +32,19 @@ public class JobProtectService extends JobService {
     //隔一段时间检查进程是否在运行，如果没有运行，则重启activity
     @Override
     public boolean onStartJob(JobParameters params) {
+        Log.i(TAG,"onStartJob "+Tools.getTimeStamp());
         boolean running = Tools.isServiceRun(this,"com.zou.wechatdetector.service.MainService");
-        Log.i(TAG,"doing job time :"+Tools.getTimeStamp());
-        Log.i(TAG,"process running :"+running);
-
-
+//        boolean running=Tools.isExistActivity(this,MainActivity.class);
+        Log.i(TAG,"service running = "+running);
+        Toast.makeText(this,"onStartJob"+Tools.getTimeStamp()+" running = "+running,Toast.LENGTH_SHORT).show();
         if(!running){
+            Log.i(TAG,"startActivity");
+            Toast.makeText(this,"startActivity",Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
+        }else{
+            Toast.makeText(this,"noStartActivity",Toast.LENGTH_SHORT).show();
         }
 //        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.N){
 //            scheduleRefresh();
