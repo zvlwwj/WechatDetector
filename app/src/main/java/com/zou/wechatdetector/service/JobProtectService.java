@@ -36,15 +36,15 @@ public class JobProtectService extends JobService {
         boolean running = Tools.isServiceRun(this,"com.zou.wechatdetector.service.MainService");
 //        boolean running=Tools.isExistActivity(this,MainActivity.class);
         Log.i(TAG,"service running = "+running);
-        Toast.makeText(this,"onStartJob"+Tools.getTimeStamp()+" running = "+running,Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this,"onStartJob"+Tools.getTimeStamp()+" running = "+running,Toast.LENGTH_SHORT).show();
         if(!running){
             Log.i(TAG,"startActivity");
-            Toast.makeText(this,"startActivity",Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this,"startActivity",Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }else{
-            Toast.makeText(this,"noStartActivity",Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this,"noStartActivity",Toast.LENGTH_SHORT).show();
         }
 //        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.N){
 //            scheduleRefresh();

@@ -111,7 +111,7 @@ public class MainService extends Service {
                         e.printStackTrace();
                     }
                     String foregroundApp = Tools.getTopAppPackageName(MainService.this);
-                    Log.i(TAG,"alive...");
+                    Log.i(TAG,"alive..."+Tools.getTimeStamp());
                     if(foregroundApp.equals("com.tencent.mm")) {
                         Log.i(TAG,"captureScreen");
                         createVirtualDisplay();

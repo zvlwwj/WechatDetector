@@ -68,6 +68,10 @@ public class MainActivity extends Activity {
         //启动守护进程
 //        Intent portectService = new Intent(this,ProtectService.class);
 //        startService(portectService);
+        startJobScheduler();
+    }
+
+    private void startJobScheduler() {
         JobScheduler jobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
         jobScheduler.cancelAll();
         JobInfo.Builder builder = new JobInfo.Builder(1024, new ComponentName(getPackageName(), JobProtectService.class.getName()));
