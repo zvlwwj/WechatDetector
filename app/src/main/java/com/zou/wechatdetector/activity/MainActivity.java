@@ -46,6 +46,7 @@ public class MainActivity extends Activity {
     private MediaProjectionManager projectionManager;
     private static final int REQUEST_CODE_SCREEN_CAPTURE = 101;
     private static final int REQUEST_CODE_USAGE_ACCESS = 102;
+    private MainServiceConnection mainServiceConnection;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,9 +61,9 @@ public class MainActivity extends Activity {
 //            //android o 中有限制
 //            startForegroundService(intent);
 //        }else {
-//        mainServiceConnection = new MainServiceConnection();
-//        bindService(intent,mainServiceConnection, Service.BIND_AUTO_CREATE);
-        startService(intent);
+        mainServiceConnection = new MainServiceConnection();
+        bindService(intent,mainServiceConnection, Service.BIND_AUTO_CREATE);
+//        startService(intent);
 //        }
         Log.i(TAG,"onCreate");
         //启动守护进程
@@ -99,7 +100,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        this.unbindService(mainServiceConnection);
+        this.unbindService(mainServiceConnection);
     }
 
     /**
@@ -168,6 +169,19 @@ public class MainActivity extends Activity {
                     startActivityForResult(captureIntent, REQUEST_CODE_SCREEN_CAPTURE);
                 }
                 break;
+        }
+    }
+
+    private class MainServiceConnection implements ServiceConnection{
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
         }
     }
 
