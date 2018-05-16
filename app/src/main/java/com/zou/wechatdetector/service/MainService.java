@@ -20,6 +20,7 @@ import android.media.Image;
 import android.media.ImageReader;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
+import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.SystemClock;
@@ -74,7 +75,13 @@ public class MainService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return new SubBinder();
+    }
+
+    public class SubBinder extends Binder{
+        public void ShowTips(){
+
+        }
     }
 
     @Override

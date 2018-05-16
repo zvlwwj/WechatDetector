@@ -6,14 +6,18 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 import com.zou.wechatdetector.R;
 import com.zou.wechatdetector.bean.Device;
 import com.zou.wechatdetector.bean.GsonAddDeviceBean;
@@ -46,12 +50,14 @@ public class BindActivity extends Activity{
     private Button btn_bind;
     private TextInputLayout textInputLayout_username,textInputLayout_devicename;
     private BindService bindService;
+    private ImageButton ib_scan,ib_close;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bind);
         initData();
         initView();
+        setListener();
 
         btn_bind.setOnClickListener(v -> {
             if(et_username.getText().toString().isEmpty()){
@@ -66,16 +72,17 @@ public class BindActivity extends Activity{
         });
 
         sp = getSharedPreferences("detector",0);
-        if(sp.getBoolean("fristTime",true)){
-            //第一次进入应用
-            sp.edit().putBoolean("fristTime",false).apply();
-        }else {
+        if(!sp.getBoolean("fristTime",true)){
             Intent intent = new Intent(BindActivity.this,MainActivity.class);
             startActivity(intent);
         }
     }
 
+
+
     private void initView() {
+        ib_scan = findViewById(R.id.ib_scan);
+        ib_close = findViewById(R.id.ib_close);
         et_username = findViewById(R.id.et_username);
         btn_bind = findViewById(R.id.btn_bind);
         textInputLayout_username = findViewById(R.id.textInputLayout_username);
@@ -94,6 +101,37 @@ public class BindActivity extends Activity{
                 .build();
         bindService = retrofit.create(BindService.class);
         EventBus.getDefault().register(this);
+    }
+
+    private void setListener() {
+        ib_scan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //扫描二维码
+                IntentIntegrator intentIntegrator = new IntentIntegrator(BindActivity.this);
+                intentIntegrator.initiateScan();
+            }
+        });
+        ib_close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+                System.exit(0);
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // 获取解析结果
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if (result != null) {
+            if (result.getContents() != null) {
+                et_username.setText(result.getContents());
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     @Subscribe
@@ -126,6 +164,8 @@ public class BindActivity extends Activity{
                                 Toast.makeText(BindActivity.this,"绑定成功",Toast.LENGTH_SHORT).show();
                                 sp.edit().putString("user_name",gsonBindUserBean.getUser_name()).apply();
                                 sp.edit().putInt("deviceId",gsonBindUserBean.getDeviceId()).apply();
+                                //第一次进入应用
+                                sp.edit().putBoolean("fristTime",false).apply();
                                 Intent intent = new Intent(BindActivity.this,MainActivity.class);
                                 startActivity(intent);
                                 break;
@@ -190,6 +230,8 @@ public class BindActivity extends Activity{
                                 Toast.makeText(BindActivity.this,"设备添加成功",Toast.LENGTH_SHORT).show();
                                 sp.edit().putString("user_name",gsonAddDeviceBean.getUser_name()).apply();
                                 sp.edit().putInt("deviceId",gsonAddDeviceBean.getDeviceId()).apply();
+                                //第一次进入应用
+                                sp.edit().putBoolean("fristTime",false).apply();
                                 Intent intent = new Intent(BindActivity.this,MainActivity.class);
                                 startActivity(intent);
                                 break;
@@ -229,6 +271,8 @@ public class BindActivity extends Activity{
                 .setPositiveButton("确定", (dialog, which) -> {
                     sp.edit().putString("user_name",et_username.getText().toString()).apply();
                     sp.edit().putInt("deviceId", selectedDevice[0].getDeviceId()).apply();
+                    //第一次进入应用
+                    sp.edit().putBoolean("fristTime",false).apply();
                     Intent intent = new Intent(BindActivity.this,MainActivity.class);
                     startActivity(intent);
                 })
