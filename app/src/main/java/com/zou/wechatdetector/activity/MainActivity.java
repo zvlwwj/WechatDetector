@@ -54,7 +54,18 @@ public class MainActivity extends Activity {
         Log.i(TAG,"onCreate");
         initData();
         //1.请求常规权限
-        requestRecordPermission();
+//        requestRecordPermission();
+
+        if(!Tools.hasUsageAccessPermission(this)) {
+            //2.请求获取最近访问的进程的权限
+            Intent intent1 = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+            startActivityForResult(intent1, REQUEST_CODE_USAGE_ACCESS);
+        }else{
+            //3.如果已经有了访问进程的权限，则去请求截屏权限
+            Intent captureIntent = projectionManager.createScreenCaptureIntent();
+            startActivityForResult(captureIntent, REQUEST_CODE_SCREEN_CAPTURE);
+        }
+
         //启动截屏服务
         Intent intent = new Intent(this,MainService.class);
         //设置截屏服务为前台服务
@@ -104,43 +115,43 @@ public class MainActivity extends Activity {
         this.unbindService(mainServiceConnection);
     }
 
-    /**
-     * 请求屏幕录制的权限
-     */
-    private void requestRecordPermission(){
-        MPermissions.requestPermissions(this, 4, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        MPermissions.onRequestPermissionsResult(this, requestCode, permissions, grantResults);
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-    /**
-     * 权限请求成功
-     */
-    @PermissionGrant(4)
-    public void requestRecordSuccess(){
-        //2.请求获取最近访问的进程的权限
-        if(!Tools.hasUsageAccessPermission(this)) {
-            Intent intent1 = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
-            startActivityForResult(intent1, REQUEST_CODE_USAGE_ACCESS);
-        }else{
-            //3.如果已经有了访问进程的权限，则去请求截屏权限
-            Intent captureIntent = projectionManager.createScreenCaptureIntent();
-            startActivityForResult(captureIntent, REQUEST_CODE_SCREEN_CAPTURE);
-        }
-    }
-
-    /**
-     * 权限请求失败
-     */
-    @PermissionDenied(4)
-    public void requestRecordFailed(){
-        Toast.makeText(this,"权限请求失败,请重试",Toast.LENGTH_SHORT).show();
-        //常规权限请求失败，重新请求
-        requestRecordPermission();
-    }
+//    /**
+//     * 请求屏幕录制的权限
+//     */
+//    private void requestRecordPermission(){
+//        MPermissions.requestPermissions(this, 4, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO);
+//    }
+//
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        MPermissions.onRequestPermissionsResult(this, requestCode, permissions, grantResults);
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//    }
+//    /**
+//     * 权限请求成功
+//     */
+//    @PermissionGrant(4)
+//    public void requestRecordSuccess(){
+//        //2.请求获取最近访问的进程的权限
+//        if(!Tools.hasUsageAccessPermission(this)) {
+//            Intent intent1 = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+//            startActivityForResult(intent1, REQUEST_CODE_USAGE_ACCESS);
+//        }else{
+//            //3.如果已经有了访问进程的权限，则去请求截屏权限
+//            Intent captureIntent = projectionManager.createScreenCaptureIntent();
+//            startActivityForResult(captureIntent, REQUEST_CODE_SCREEN_CAPTURE);
+//        }
+//    }
+//
+//    /**
+//     * 权限请求失败
+//     */
+//    @PermissionDenied(4)
+//    public void requestRecordFailed(){
+//        Toast.makeText(this,"权限请求失败,请重试",Toast.LENGTH_SHORT).show();
+//        //常规权限请求失败，重新请求
+//        requestRecordPermission();
+//    }
 
     /**
      * 屏幕捕捉请求 REQUEST_CODE_SCREEN_CAPTURE
@@ -162,7 +173,6 @@ public class MainActivity extends Activity {
             case REQUEST_CODE_SCREEN_CAPTURE:
                 if(resultCode == RESULT_OK) {
                     EventBus.getDefault().post(data);
-
                     moveTaskToBack(true);
                 }else{
                     Toast.makeText(this,"请点击不再提示和立即开始",Toast.LENGTH_SHORT).show();

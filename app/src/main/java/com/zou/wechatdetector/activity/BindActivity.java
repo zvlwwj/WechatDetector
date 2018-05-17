@@ -28,12 +28,15 @@ import com.zou.wechatdetector.utils.Constants;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 import rx.Observable;
 import rx.Observer;
@@ -59,17 +62,7 @@ public class BindActivity extends Activity{
         initView();
         setListener();
 
-        btn_bind.setOnClickListener(v -> {
-            if(et_username.getText().toString().isEmpty()){
-                textInputLayout_username.setError("openId不能为空！");
-                return;
-            }
-            if(et_devicename.getText().toString().isEmpty()){
-                textInputLayout_devicename.setError("设备名称不能为空！");
-                return;
-            }
-            showBindDialog();
-        });
+
 
         sp = getSharedPreferences("detector",0);
         if(!sp.getBoolean("fristTime",true)){
@@ -104,6 +97,17 @@ public class BindActivity extends Activity{
     }
 
     private void setListener() {
+        btn_bind.setOnClickListener(v -> {
+            if(et_username.getText().toString().isEmpty()){
+                textInputLayout_username.setError("openId不能为空！");
+                return;
+            }
+            if(et_devicename.getText().toString().isEmpty()){
+                textInputLayout_devicename.setError("设备名称不能为空！");
+                return;
+            }
+            bindUser();
+        });
         ib_scan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -291,7 +295,7 @@ public class BindActivity extends Activity{
 
     interface BindService{
         @POST("bindUser")
-        Observable<GsonBindUserBean> bindUser(@Query("user_name")String user_name, @Query("device_name")String device_name);
+        Observable<GsonBindUserBean> bindUser(@Query("user_name") String user_name, @Query("device_name")String device_name);
         @POST("selectDevice")
         Observable<GsonGetDeviceListBean> selectDevice(@Query("user_name")String user_name);
         @POST("addDevice")
