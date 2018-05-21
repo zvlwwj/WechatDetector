@@ -108,20 +108,14 @@ public class BindActivity extends Activity{
             }
             bindUser();
         });
-        ib_scan.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //扫描二维码
-                IntentIntegrator intentIntegrator = new IntentIntegrator(BindActivity.this);
-                intentIntegrator.initiateScan();
-            }
+        ib_scan.setOnClickListener(v -> {
+            //扫描二维码
+            IntentIntegrator intentIntegrator = new IntentIntegrator(BindActivity.this);
+            intentIntegrator.initiateScan();
         });
-        ib_close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-                System.exit(0);
-            }
+        ib_close.setOnClickListener(v -> {
+            finish();
+            System.exit(0);
         });
     }
 
