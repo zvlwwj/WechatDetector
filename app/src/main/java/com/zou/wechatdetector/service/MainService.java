@@ -134,6 +134,7 @@ public class MainService extends Service {
 
     @Subscribe
     public void onEvent(Intent data){
+        Log.i(TAG,"onEvent");
         projectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
         assert projectionManager != null;
         mediaProjection = projectionManager.getMediaProjection(Activity.RESULT_OK, data);

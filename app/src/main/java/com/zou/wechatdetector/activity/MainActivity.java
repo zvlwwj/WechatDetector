@@ -172,6 +172,7 @@ public class MainActivity extends Activity {
                 break;
             case REQUEST_CODE_SCREEN_CAPTURE:
                 if(resultCode == RESULT_OK) {
+                    Log.i(TAG,"postCaptureEvent");
                     EventBus.getDefault().post(data);
                     moveTaskToBack(true);
                 }else{

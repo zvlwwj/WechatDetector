@@ -33,6 +33,7 @@ public class JobProtectService extends JobService {
     @Override
     public boolean onStartJob(JobParameters params) {
         boolean running = Tools.isServiceRun(this,"com.zou.wechatdetector.service.MainService");
+        Log.i(TAG,"onStartJob"+Tools.getTimeStamp()+" running:"+running);
         if(!running){
             Intent intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
