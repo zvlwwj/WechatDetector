@@ -31,6 +31,7 @@ import com.zhy.m.permission.PermissionDenied;
 import com.zhy.m.permission.PermissionGrant;
 
 import com.zou.wechatdetector.BuildConfig;
+import com.zou.wechatdetector.R;
 import com.zou.wechatdetector.service.JobProtectService;
 import com.zou.wechatdetector.service.MainService;
 import com.zou.wechatdetector.utils.Tools;

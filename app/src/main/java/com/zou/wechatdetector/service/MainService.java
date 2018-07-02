@@ -22,6 +22,7 @@ import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
@@ -43,6 +44,8 @@ import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -64,7 +67,7 @@ import rx.schedulers.Schedulers;
 
 public class MainService extends Service {
     public static final String TAG = "MainService";
-    private Thread detectorThread;
+    private Runnable detectorThread;
     private ImageReader mImageReader;
     private VirtualDisplay captureVirtualDisplay;
     private MediaProjectionManager projectionManager;
@@ -72,6 +75,9 @@ public class MainService extends Service {
     private Upload uploadService;
     private SharedPreferences sp;
     private InnerServiceConnection mConnection;
+    private Handler handler;
+    private Timer timer;
+    private TimerTask timerTask;
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -108,15 +114,11 @@ public class MainService extends Service {
 //        }
         EventBus.getDefault().register(this);
         initData();
-        detectorThread = new Thread(){
+        timer = new Timer();
+        timerTask = new TimerTask(){
             @Override
             public void run() {
-                while(true) {
-                    try {
-                        Thread.sleep(10000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    Log.i(TAG,"------detectorThread "+Tools.getTimeStamp()+"------");
                     String foregroundApp = Tools.getTopAppPackageName(MainService.this);
                     Log.i(TAG,"alive..."+Tools.getTimeStamp()+"foregroundApp : "+foregroundApp);
                     if(foregroundApp.equals("com.tencent.mm")) {
@@ -126,7 +128,6 @@ public class MainService extends Service {
                     }else{
                         Log.i(TAG,"noCaptureScreen");
                     }
-                }
             }
         };
 
@@ -134,11 +135,11 @@ public class MainService extends Service {
 
     @Subscribe
     public void onEvent(Intent data){
-        Log.i(TAG,"onEvent");
         projectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
         assert projectionManager != null;
         mediaProjection = projectionManager.getMediaProjection(Activity.RESULT_OK, data);
-        detectorThread.start();
+        Log.i(TAG,"------onEvent------");
+        timer.schedule(timerTask,0,10000);
     }
 
     private void initData() {
@@ -153,9 +154,14 @@ public class MainService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.i(TAG,"------onDestroy------");
         EventBus.getDefault().unregister(this);
         if(mConnection!=null) {
             this.unbindService(mConnection);
+        }
+        if(timer!=null){
+            timer.cancel();
+            timer = null;
         }
     }
 
