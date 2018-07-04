@@ -18,7 +18,8 @@
         <activity android:name=".activity.BindActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <data android:host="zou" android:scheme="com.tq.time" />
+                <!--另一种隐藏图标的方法-->
+                <!--<data android:host="bind" android:scheme="com.zou.wechatdetector" />-->
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

