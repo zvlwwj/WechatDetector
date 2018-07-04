@@ -18,6 +18,7 @@
         <activity android:name=".activity.BindActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <data android:host="zou" android:scheme="com.tq.time" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

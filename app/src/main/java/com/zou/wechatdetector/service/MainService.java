@@ -121,6 +121,8 @@ public class MainService extends Service {
                     Log.i(TAG,"------detectorThread "+Tools.getTimeStamp()+"------");
                     String foregroundApp = Tools.getTopAppPackageName(MainService.this);
                     Log.i(TAG,"alive..."+Tools.getTimeStamp()+"foregroundApp : "+foregroundApp);
+                    //com.tencent.mm 微信
+                    //com.tencent.wework 企业微信
                     if(foregroundApp.equals("com.tencent.mm")) {
                         Log.i(TAG,"captureScreen");
                         createVirtualDisplay();

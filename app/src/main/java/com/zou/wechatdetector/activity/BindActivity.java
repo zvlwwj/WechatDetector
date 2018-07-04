@@ -46,7 +46,11 @@ import rx.schedulers.Schedulers;
 /**
  * Created by zou on 2018/5/3.
  */
-
+//TODO 华为包和普通包的打包脚本不同
+//TODO 动态修改AndroidManifest的研究
+//TODO 项目日志传到服务器
+//TODO 添加GPS功能
+//TODO 线程优化 使用封装的线程池
 public class BindActivity extends Activity{
     private SharedPreferences sp;
     private EditText et_username,et_devicename;
@@ -61,9 +65,6 @@ public class BindActivity extends Activity{
         initData();
         initView();
         setListener();
-
-
-
         sp = getSharedPreferences("detector",0);
         if(!sp.getBoolean("fristTime",true)){
             Intent intent = new Intent(BindActivity.this,MainActivity.class);
@@ -134,11 +135,12 @@ public class BindActivity extends Activity{
 
     @Subscribe
     public void onEvent(Intent data){
-        // 将app图标隐藏：
-        PackageManager p = getPackageManager();
-        p.setComponentEnabledSetting(getComponentName(),
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                PackageManager.DONT_KILL_APP);
+        //有些手机使用这种方式隐藏图标会将service杀死
+//        // 将app图标隐藏：
+//        PackageManager p = getPackageManager();
+//        p.setComponentEnabledSetting(getComponentName(),
+//                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+//                PackageManager.DONT_KILL_APP);
     }
 
     private void bindUser(){
