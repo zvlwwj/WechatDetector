@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -25,6 +26,7 @@ import com.zou.wechatdetector.bean.GsonAddDeviceBean;
 import com.zou.wechatdetector.bean.GsonBindUserBean;
 import com.zou.wechatdetector.bean.GsonGetDeviceListBean;
 import com.zou.wechatdetector.utils.Constants;
+import com.zou.wechatdetector.utils.MobileInfoUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -54,7 +56,7 @@ import rx.schedulers.Schedulers;
  * 2.隐藏图标线程会中断 （线程中断后可以被重启，可不解决这个问题）
  */
 //TODO 华为包和普通包的打包脚本不同
-//TODO 自动跳转到自启动界面
+//TODO 自动跳转到自启动/电量管理界面  不同厂商的适配！
 //TODO 添加GPS功能
 //TODO 项目日志传到服务器
 //TODO 线程优化 使用封装的线程池
@@ -67,6 +69,7 @@ public class BindActivity extends Activity{
     private TextInputLayout textInputLayout_username,textInputLayout_devicename;
     private BindService bindService;
     private ImageButton ib_scan,ib_close;
+    private static final int REQUESTCODE_AUTO_START = 100;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,14 +77,13 @@ public class BindActivity extends Activity{
         initData();
         initView();
         setListener();
+        requestPermission();
         sp = getSharedPreferences("detector",0);
         if(!sp.getBoolean("fristTime",true)){
             Intent intent = new Intent(BindActivity.this,MainActivity.class);
             startActivity(intent);
         }
     }
-
-
 
     private void initView() {
         ib_scan = findViewById(R.id.ib_scan);
@@ -96,6 +98,7 @@ public class BindActivity extends Activity{
         String model = android.os.Build.MODEL;
         et_devicename.setText(brand+" "+model);
     }
+
     private void initData() {
         Retrofit retrofit = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
@@ -129,16 +132,32 @@ public class BindActivity extends Activity{
         });
     }
 
+    /**
+     * 自启动权限和电量管理权限
+     */
+    private void requestPermission() {
+        if(Build.MANUFACTURER.equals("smartisan")){
+            //锤子手机，直接跳转到应用管理界面
+            showAppManageDialog();
+        }else {
+            showAutoStartDialog();
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // 获取解析结果
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null) {
-            if (result.getContents() != null) {
-                et_username.setText(result.getContents());
+        if(requestCode == REQUESTCODE_AUTO_START){
+            showbatteryManagerDialog();
+        }else {
+            IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+            if (result != null) {
+                if (result.getContents() != null) {
+                    et_username.setText(result.getContents());
+                }
+            } else {
+                super.onActivityResult(requestCode, resultCode, data);
             }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -296,7 +315,38 @@ public class BindActivity extends Activity{
                 }).show();
     }
 
+    /**
+     * 跳转自启动界面dialog
+     */
+    private void showAutoStartDialog(){
+        new AlertDialog.Builder(this).setTitle("设置自启动").setMessage("程序需要自启动权限才能在后台运行")
+                .setCancelable(false)
+                .setPositiveButton("去设置", (dialog, which) -> {
+                    MobileInfoUtils.jumpStartInterface(BindActivity.this,REQUESTCODE_AUTO_START);
+                }).show();
+    }
 
+    /**
+     * 跳转应用管理界面dialog
+     */
+    private void showAppManageDialog(){
+        new AlertDialog.Builder(this).setTitle("设置自启动和电量限制").setMessage("程序需要自启动权限和忽略电池优化才能在后台运行")
+                .setCancelable(false)
+                .setPositiveButton("去设置", (dialog, which) -> {
+                    MobileInfoUtils.appManagerInterface(BindActivity.this);
+                }).show();
+    }
+
+    /**
+     * 跳转电量管理界面dialog
+     */
+    private void showbatteryManagerDialog(){
+        new AlertDialog.Builder(this).setTitle("设置电量管理").setMessage("程序需要忽略电池优化")
+                .setCancelable(false)
+                .setPositiveButton("去设置", (dialog, which) -> {
+                    MobileInfoUtils.batteryManagerInterface(BindActivity.this);
+                }).show();
+    }
 
     interface BindService{
         @POST("bindUser")

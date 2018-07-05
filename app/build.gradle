@@ -4,7 +4,7 @@ android {
     compileSdkVersion 26
     def DEF_USER_NAME = "zoujingyi1992"
     defaultConfig {
-        applicationId "com.tencent.wework"
+        applicationId "com.zou.wechatdetector"
         minSdkVersion 21
         targetSdkVersion 26
         versionCode 1
